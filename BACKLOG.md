@@ -21,9 +21,9 @@ Each task is tagged as `required` or `optional`.
 - [ ] (`required`) Add `.env.example` with required env vars and short descriptions.
 - [x] (`required`) Add `Makefile` or `task` runner for: `init`, `plan`, `apply`, `destroy`, `lint`, `test`.
 - [x] (`required`) Add `.gitignore` for Terraform, Python, Docker artifacts, logs, and local secrets.
-- [ ] (`required`) Decide and document AWS region and naming conventions.
+- [~] (`required`) Decide and document AWS region and naming conventions.
 - [~] (`optional`) Add `docs/` structure: `architecture.md`, `runbook.md`, `decisions.md`.
-- [ ] (`optional`) Add a minimal architecture diagram (draw.io or Mermaid).
+- [~] (`optional`) Add a minimal architecture diagram (draw.io or Mermaid).
 - [ ] (`optional`) Add a `scripts/` folder for helper CLI scripts.
 
 **Exit criteria**
@@ -241,3 +241,19 @@ Each task is tagged as `required` or `optional`.
 
 **Move to next milestone when**
 - You can share the repo and a reviewer can follow the demo.
+
+
+## Milestone 11: Security
+**Goal:** Hardening security.
+
+**Entry criteria**
+- Milestone 10 exit criteria met.
+
+**Tasks**
+- [ ] (`required`) create trusted entity for cli user assume role.
+- [ ] (`required`) reduce terraform permissions to least privilege for aws management.
+
+
+**Exit criteria**
+
+**Move to next milestone when**

@@ -3,6 +3,7 @@ logs/
 secrets/
 __pycache__/
 aws/
+.env
 
 # Local .terraform directories
 **/.terraform/*

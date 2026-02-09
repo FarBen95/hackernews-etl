@@ -1,0 +1,11 @@
+region       = "aws_region"
+environment      = "dev"
+project     = "hackernews-etl"
+profile = "your_awscli_profile"
+role_arn = "arn:aws:iam::your_account_id:role/your_role_name"
+session_name = "hackernews-terraform-session"
+
+redshift_database_name    = "db_name"
+redshift_db_username  = "db_username"
+redshift_db_password  = "db_password!"
+redshift_base_capacity       = 8

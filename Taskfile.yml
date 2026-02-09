@@ -11,3 +11,17 @@ tasks:
     cmds:
       - echo "{{.GREETING}}"
     silent: true
+
+  plan:
+    desc: Run terraform plan
+    cmds:
+      - terraform -chdir=terraform plan
+  apply:
+    desc: Run terraform apply
+    cmds:
+      - terraform -chdir=terraform apply -auto-approve 
+  destroy:
+    desc: Run terraform destroy
+    cmds:
+      - terraform -chdir=terraform destroy 
+  
