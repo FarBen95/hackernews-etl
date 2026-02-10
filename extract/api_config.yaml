@@ -1,0 +1,5 @@
+hackernews:
+  base_url: "https://hacker-news.firebaseio.com/v0"
+  endpoints:
+    item: "/item/{id}.json"
+    top_stories: "/topstories.json"

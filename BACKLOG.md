@@ -40,14 +40,14 @@ Each task is tagged as `required` or `optional`.
 
 **Tasks**
 - [ ] (`required`) Initialize Terraform backend (S3 + DynamoDB lock).
-- [ ] (`required`) Create base IAM roles for Terraform and runtime services.
-- [ ] (`required`) Create VPC with public/private subnets and NAT (minimal setup).
-- [ ] (`required`) Create security groups for EC2, Airflow, and Redshift.
-- [ ] (`required`) Create S3 buckets: `raw`, `config` with lifecycle rules.
-- [ ] (`required`) Add SSM Parameter Store path for secrets: `/hackernews-etl/*`.
+- [x] (`required`) Create base IAM roles for Terraform and runtime services.
+- [x] (`required`) Create VPC with public/private subnets and NAT (minimal setup).
+- [x] (`required`) Create security groups for EC2, Airflow, and Redshift.
+- [x] (`required`) Create S3 buckets: `raw`, `config` with lifecycle rules.
+- [x] (`required`) Add SSM Parameter Store path for secrets: `/hackernews-etl/*`.
 - [ ] (`required`) Add outputs for bucket names, VPC, subnets, SG IDs.
-- [ ] (`optional`) Add VPC endpoints for S3/SSM to reduce NAT usage.
-- [ ] (`optional`) Enable S3 bucket encryption and versioning.
+- [~] (`optional`) Add VPC endpoints for S3/SSM to reduce NAT usage.
+- [~] (`optional`) Enable S3 bucket encryption and versioning.
 - [ ] (`optional`) Enforce S3 block public access and bucket policies.
 - [ ] (`optional`) Add cost budget alarms to prevent surprises.
 - [ ] (`optional`) Add standardized tagging (owner, env, project).

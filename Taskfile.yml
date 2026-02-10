@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://taskfile.dev/schema.json
+
 
 version: '3'
 
@@ -24,4 +24,10 @@ tasks:
     desc: Run terraform destroy
     cmds:
       - terraform -chdir=terraform destroy 
+
+  test:
+    desc: Run all Python tests with pytest
+    cmds:
+      - pytest -v
+    silent: false
   

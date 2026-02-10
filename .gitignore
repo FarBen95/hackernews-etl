@@ -2,8 +2,10 @@
 logs/
 secrets/
 __pycache__/
+__pytest_cache__/
 aws/
 .env
+wiki/
 
 # Local .terraform directories
 **/.terraform/*
