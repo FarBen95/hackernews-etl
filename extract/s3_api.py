@@ -1,18 +1,16 @@
-"""S3 API operations for storing data."""
 import logging
-from typing import Optional
 
 import boto3
 from botocore.exceptions import ClientError
 
 logger = logging.getLogger(__name__)
 
-_S3_CLIENT: Optional[boto3.client] = None
+_S3_CLIENT = None
 
 
-def get_s3_client() -> boto3.client:
+def get_s3_client():
     global _S3_CLIENT
-    if _S3_CLIENT is None:
+    if _S3_CLIENT is None :
         _S3_CLIENT = boto3.client('s3')
         logger.debug("Created new S3 client")
     return _S3_CLIENT

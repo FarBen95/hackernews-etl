@@ -12,6 +12,11 @@ tasks:
       - echo "{{.GREETING}}"
     silent: true
 
+  aws-login:
+    desc: Log in to AWS using AWS CLI
+    cmds:
+      - aws login --remote --profile hackernews 
+
   plan:
     desc: Run terraform plan
     cmds:
@@ -19,11 +24,15 @@ tasks:
   apply:
     desc: Run terraform apply
     cmds:
-      - terraform -chdir=terraform apply -auto-approve 
+      - terraform -chdir=terraform apply {{.CLI_ARGS}}
   destroy:
     desc: Run terraform destroy
     cmds:
       - terraform -chdir=terraform destroy 
+  output:
+    desc: Show terraform outputs
+    cmds:
+      - terraform -chdir=terraform output {{.CLI_ARGS}}
 
   test:
     desc: Run all Python tests with pytest
