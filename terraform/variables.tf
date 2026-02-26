@@ -13,7 +13,7 @@ variable "environment" {
 variable "project" {
   description = "Project name"
   type        = string
-  default     = "de-hackernews"
+  default     = "hackernews-etl"
 }
 
 variable "profile" {
@@ -105,3 +105,10 @@ variable "redshift_base_capacity" {
   type        = number
   default     = 4
 }
+
+variable "glue_db_name" {
+  description = "Glue Catalog Database name"
+  type        = string
+  default     = "hackernews_db"
+}
+

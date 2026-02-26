@@ -85,8 +85,8 @@ Each task is tagged as `required` or `optional`.
 - Milestone 2 exit criteria met.
 
 **Tasks**
-- [ ] (`required`) Implement HN API extractor (Python) with pagination and retries.
-- [ ] (`required`) Store raw JSON to S3 `raw/hn/YYYY/MM/DD/`.
+- [~] (`required`) Implement HN API extractor (Python) with pagination and retries.
+- [x] (`required`) Store raw JSON to S3.
 - [ ] (`required`) Add idempotency logic (checkpoint by max item ID or timestamp).
 - [ ] (`required`) Add a simple CLI entrypoint for local runs.
 - [ ] (`required`) Add a smoke test: fetch 10 items and upload to S3.
