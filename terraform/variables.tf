@@ -62,9 +62,19 @@ variable "s3_prefix" {
   default = ""
 }
 
-variable "bucket_raw_data" {
-  description = "Name of S3 raw data bucket"
-  default = "raw-data"
+variable "bucket_bronze_layer" {
+  description = "Name of S3 bronze layer bucket"
+  default = "bronze-layer"
+}
+
+variable "bucket_silver_layer" {
+  description = "Name of S3 silver layer bucket"
+  default = "silver-layer"
+}
+
+variable "bucket_gold_layer" {
+  description = "Name of S3 gold data bucket"
+  default = "gold-data"
 }
 
 variable "bucket_docker" {
