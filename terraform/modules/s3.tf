@@ -8,8 +8,8 @@ resource "aws_s3_bucket" "bronze_layer" {
   }
 }
 
-resource "aws_s3_bucket_versioning" "silver_layer" {
-  bucket = aws_s3_bucket.silver_layer.id
+resource "aws_s3_bucket_versioning" "bronze_layer" {
+  bucket = aws_s3_bucket.bronze_layer.id
 
   versioning_configuration {
     status = "Enabled"
@@ -26,8 +26,8 @@ resource "aws_s3_bucket" "silver_layer" {
   }
 }
 
-resource "aws_s3_bucket_versioning" "gold_layer" {
-  bucket = aws_s3_bucket.gold_layer.id
+resource "aws_s3_bucket_versioning" "silver_layer" {
+  bucket = aws_s3_bucket.silver_layer.id
 
   versioning_configuration {
     status = "Enabled"
@@ -85,5 +85,47 @@ resource "aws_s3_bucket_versioning" "airflow" {
 
   versioning_configuration {
     status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket" "glue" {
+  bucket = "${var.project}-${var.environment}-${var.bucket_glue}"
+
+  tags = {
+    Name        = "${var.project}-${var.environment}-${var.bucket_glue}"
+    Environment = var.environment
+    Project     = var.project
+  }
+}
+
+resource "aws_s3_bucket_versioning" "glue" {
+  bucket = aws_s3_bucket.glue.id
+
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_s3_object" "silver_transform_spark_job" {
+  bucket = aws_s3_bucket.glue.bucket
+  key    = "jobs/silver_transform_spark_job.py"
+  source = "${path.module}/../scripts/silver_transform_spark_job.py"
+  etag  = filemd5("${path.module}/../scripts/silver_transform_spark_job.py")
+
+  tags = {
+    Project     = var.project
+    Environment = var.environment
+  }
+}
+
+resource "aws_s3_object" "gold_transform_spark_job" {
+  bucket = aws_s3_bucket.glue.bucket
+  key    = "jobs/gold_transform_spark_job.py"
+  source = "${path.module}/../scripts/gold_transform_spark_job.py"
+  etag  = filemd5("${path.module}/../scripts/gold_transform_spark_job.py")
+
+  tags = {
+    Project     = var.project
+    Environment = var.environment
   }
 }

@@ -87,6 +87,11 @@ variable "bucket_airflow" {
   default = "airflow"
 }
 
+variable "bucket_glue" {
+  description = "Name of S3 glue bucket"
+  default = "glue"
+}
+
 variable "param_env" {
   description = "SSM parameter name of .env file"
   default = ".env"

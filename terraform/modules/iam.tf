@@ -1,9 +1,9 @@
-resource "aws_iam_role" "glue_crawler_role" {
-  name = "${var.project}-glue-crawler-role"
-  assume_role_policy = data.aws_iam_policy_document.glue_crawler_assume_role_policy.json
+resource "aws_iam_role" "glue_role" {
+  name = "${var.project}-glue-role"
+  assume_role_policy = data.aws_iam_policy_document.glue_trust_policy.json
 }
 
-data "aws_iam_policy_document" "glue_crawler_trust_policy" {
+data "aws_iam_policy_document" "glue_trust_policy" {
   statement {
     actions = ["sts:AssumeRole"]
     principals {
@@ -13,7 +13,7 @@ data "aws_iam_policy_document" "glue_crawler_trust_policy" {
   }
 }
 
-data "aws_iam_policy_document" "glue_crawler_policy" {
+data "aws_iam_policy_document" "glue_policy" {
     statement {
         actions = [
             "s3:GetObject",
@@ -25,8 +25,8 @@ data "aws_iam_policy_document" "glue_crawler_policy" {
     }
 }
 
-resource "aws_iam_role_policy" "glue_crawler_inline_policy" {
-    name   = "${var.project}-glue-crawler-policy"
-    role   = aws_iam_role.glue_crawler_role.id
-    policy = data.aws_iam_policy_document.glue_crawler_policy.json
+resource "aws_iam_role_policy" "glue_inline_policy" {
+    name   = "${var.project}-glue-policy"
+    role   = aws_iam_role.glue_role.id
+    policy = data.aws_iam_policy_document.glue_policy.json
 }
