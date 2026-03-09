@@ -130,8 +130,8 @@ Each task is tagged as `required` or `optional`.
 - Milestone 4 exit criteria met.
 
 **Tasks**
-- [ ] (`required`) Create Glue database for HN datasets.
-- [ ] (`required`) Create Glue tables for raw data.
+- [x] (`required`) Create Glue database for HN datasets.
+- [x] (`required`) Create Glue tables for raw data.
 - [ ] (`required`) Add a sample Athena query to validate raw data.
 - [ ] (`optional`) Add partition projection for faster query discovery.
 - [ ] (`optional`) Add a saved Athena query for demo.
