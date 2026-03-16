@@ -1,10 +1,9 @@
 import os
 import sys
-import json
 import uuid
 
+import boto3
 import pytest
-from moto import mock_aws
 
 
 # Make the `extract` directory importable and import the module under test
@@ -15,31 +14,27 @@ sys.path.insert(0, EXTRACT_DIR)
 import s3_api
 
 
-@mock_aws
-def test_s3_api_smoke_with_moto():
-    """Smoke test using moto to mock S3.
+TEST_DIR = os.path.dirname(__file__)
+sys.path.insert(0, TEST_DIR)
+from aws_test_utils import terraform_outputs, assumed_role_session
 
-    - Reads the desired bucket name from terraform outputs if available
-    - Creates the bucket in the moto mock
+
+def test_s3_api_smoke_with_aws(terraform_outputs, assumed_role_session):
+    """Smoke test using real AWS resources.
+
+    - Reads the desired bucket name from terraform outputs
     - Uses `s3_api.load_object_s3` to upload and then verifies with boto3
     """
-    import boto3
-        
-    bucket = "hackernews-etl-dev-raw-data"
-
-    s3 = boto3.client("s3", region_name="us-east-1")
-    s3.create_bucket(Bucket=bucket)
-
+    bucket = terraform_outputs["s3_bucket_names"]["bronze"]
+    s3 = assumed_role_session.client("s3")
+    s3.head_bucket(Bucket=bucket)
     key = f"smoke-test/{uuid.uuid4()}.txt"
     body = "smoke test"
 
-    # upload using the project's s3_api (will call boto3 and be intercepted by moto)
-    s3_api.load_object_s3(bucket=bucket, key=key, data=body)
+    s3_api.load_object_s3(bucket=bucket, key=key, data=body, s3_client=s3)
 
-    # verify
-    head = s3.head_object(Bucket=bucket, Key=key)
-    print(f"Head object metadata: {head}")
-    assert head.get("ContentLength") == len(body)
-
-    # cleanup
-    s3.delete_object(Bucket=bucket, Key=key)
+    try:
+        head = s3.head_object(Bucket=bucket, Key=key)
+        assert head.get("ContentLength") == len(body)
+    finally:
+        s3.delete_object(Bucket=bucket, Key=key)

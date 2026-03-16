@@ -109,8 +109,8 @@ resource "aws_s3_bucket_versioning" "glue" {
 resource "aws_s3_object" "silver_transform_spark_job" {
   bucket = aws_s3_bucket.glue.bucket
   key    = "jobs/silver_transform_spark_job.py"
-  source = "${path.module}/../scripts/silver_transform_spark_job.py"
-  etag  = filemd5("${path.module}/../scripts/silver_transform_spark_job.py")
+  source = "${path.module}/../transform/silver_transform_spark_job.py"
+  etag   = filemd5("${path.module}/../transform/silver_transform_spark_job.py")
 
   tags = {
     Project     = var.project
@@ -121,8 +121,8 @@ resource "aws_s3_object" "silver_transform_spark_job" {
 resource "aws_s3_object" "gold_transform_spark_job" {
   bucket = aws_s3_bucket.glue.bucket
   key    = "jobs/gold_transform_spark_job.py"
-  source = "${path.module}/../scripts/gold_transform_spark_job.py"
-  etag  = filemd5("${path.module}/../scripts/gold_transform_spark_job.py")
+  source = "${path.module}/../transform/gold_transform_spark_job.py"
+  etag   = filemd5("${path.module}/../transform/gold_transform_spark_job.py")
 
   tags = {
     Project     = var.project

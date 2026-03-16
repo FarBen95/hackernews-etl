@@ -30,18 +30,4 @@ datasource = glueContext.create_dynamic_frame.from_catalog(
 # Convert to Spark DataFrame for easier manipulation
 df = datasource.toDF()
 
-# Transform: filter, add date columns, drop nulls
-# transformed = (
-#     df.filter(col("event_type").isNotNull())
-#     .withColumn("event_year", year(col("event_timestamp")))
-#     .withColumn("event_month", month(col("event_timestamp")))
-#     .withColumn("event_day", dayofmonth(col("event_timestamp")))
-# )
-
-# Write partitioned output
-# transformed.write \
-#     .mode("overwrite") \
-#     .partitionBy("event_year", "event_month", "event_day") \
-#     .parquet(args["output_path"])
-
 job.commit()

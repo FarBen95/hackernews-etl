@@ -4,28 +4,37 @@ resource "aws_glue_catalog_database" "bronze_catalog_db" {
 }
 
 resource "aws_glue_catalog_database" "silver_catalog_db" {
-  name        = "${var.silver_db_name}"
+  name        = var.silver_db_name
   description = "Glue Catalog Database for S3 silver layer"
 }
 
 resource "aws_glue_catalog_database" "gold_catalog_db" {
-  name        = "${var.gold_db_name}"
+  name        = var.gold_db_name
   description = "Glue Catalog Database for S3 gold layer"
 }
 
 resource "aws_glue_crawler" "bronze_crawler" {
   name          = "${var.bronze_db_name}-crawler"
   database_name = aws_glue_catalog_database.bronze_catalog_db.name
-  role          = aws_iam_role.glue_role.arn
+  role          = aws_iam_role.glue_crawler_role.arn
 
   s3_target {
-    path = "s3://${aws_s3_bucket.raw_data.bucket}"
+    path = "s3://${aws_s3_bucket.bronze_layer.bucket}"
+  }
+
+  schema_change_policy {
+    update_behavior = "LOG"
+    delete_behavior = "LOG"
+  }
+
+  recrawl_policy {
+    recrawl_behavior = "CRAWL_NEW_FOLDERS_ONLY"
   }
 }
 
 resource "aws_glue_job" "silver_transform_spark_job" {
   name     = "silver-transform-spark-job"
-  role_arn = aws_iam_role.glue_role.arn
+  role_arn = aws_iam_role.glue_job_role.arn
 
   command {
     name            = "glueetl"
@@ -47,7 +56,8 @@ resource "aws_glue_job" "silver_transform_spark_job" {
     "--job-language"                     = "python"
     "--TempDir"                          = "s3://${aws_s3_bucket.glue.bucket}/temp/"
     "--source_database"                  = aws_glue_catalog_database.bronze_catalog_db.name
-    "--source_table"                     = "events"
+    "--source_table"                     = "items"
+    "--output_database"                  = aws_glue_catalog_database.silver_catalog_db.name
     "--output_path"                      = "s3://${aws_s3_bucket.silver_layer.bucket}/"
   }
 
@@ -63,7 +73,7 @@ resource "aws_glue_job" "silver_transform_spark_job" {
 
 resource "aws_glue_job" "gold_transform_spark_job" {
   name     = "gold-transform-spark-job"
-  role_arn = aws_iam_role.glue_role.arn
+  role_arn = aws_iam_role.glue_job_role.arn
 
   command {
     name            = "glueetl"
@@ -85,8 +95,16 @@ resource "aws_glue_job" "gold_transform_spark_job" {
     "--job-language"                     = "python"
     "--TempDir"                          = "s3://${aws_s3_bucket.glue.bucket}/temp/"
     "--source_database"                  = aws_glue_catalog_database.silver_catalog_db.name
-    "--source_table"                     = "events"
-    "--output_path"                      = "s3://${aws_s3_bucket.gold_layer.bucket}/"
+    "--source_tables" = {
+      stories  = "stories",
+      comments = "comments",
+      jobs     = "jobs",
+      polls    = "polls",
+      pollopt  = "pollopt",
+      asks     = "asks"
+    }
+    "--output_database"                  = aws_glue_catalog_database.gold_catalog_db.name
+    "--output_path" = "s3://${aws_s3_bucket.gold_layer.bucket}/"
   }
 
   execution_property {

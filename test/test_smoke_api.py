@@ -17,9 +17,7 @@ def test_hackernews_api_smoke_non_persistent():
 
     - Fetches 10 top story IDs from the public HackerNews API
     - Picks one ID and fetches its details
-    - Does not write any files to disk
     """
-
     # Fetch 10 top story ids; skip the test if network/API is unavailable
     try:
         ids = hackernews_api.fetch_top_stories_ids(limit=10)
@@ -36,4 +34,4 @@ def test_hackernews_api_smoke_non_persistent():
         pytest.skip(f"Skipping smoke test; failed to fetch story details: {exc}")
 
     assert isinstance(details, dict)
-    assert 'id' in details and int(details['id']) == int(story_id)
+    assert "id" in details and int(details["id"]) == int(story_id)

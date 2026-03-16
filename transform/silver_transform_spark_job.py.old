@@ -1,0 +1,142 @@
+# transform_events.py - Glue ETL job for transforming raw event data
+import sys
+from awsglue.transforms import *
+from awsglue.utils import getResolvedOptions
+from awsglue.context import GlueContext
+from awsglue.job import Job
+from pyspark.context import SparkContext
+from pyspark.sql.functions import (
+    col,
+    year,
+    month,
+    dayofmonth,
+    to_timestamp,
+    current_timestamp,
+    lit,
+    when,
+    sha2,
+    concat_ws,
+    row_number,
+)
+from pyspark.sql.window import Window
+
+# Get job parameters
+args = getResolvedOptions(sys.argv, [
+    "JOB_NAME",
+    "source_database",
+    "source_table",
+    "output_path"
+])
+
+sc = SparkContext()
+glueContext = GlueContext(sc)
+spark = glueContext.spark_session
+job = Job(glueContext)
+job.init(args["JOB_NAME"], args)
+
+# Read from the Glue Data Catalog
+datasource = glueContext.create_dynamic_frame.from_catalog(
+    database=args["source_database"],
+    table_name=args["source_table"]
+)
+
+# Convert to Spark DataFrame for easier manipulation
+df = datasource.toDF()
+
+# Data type normalization (only if columns exist)
+normalized = df
+if "id" in normalized.columns:
+    normalized = normalized.withColumn("id", col("id").cast("long"))
+if "parent" in normalized.columns:
+    normalized = normalized.withColumn("parent", col("parent").cast("long"))
+if "story_id" in normalized.columns:
+    normalized = normalized.withColumn("story_id", col("story_id").cast("long"))
+if "score" in normalized.columns:
+    normalized = normalized.withColumn("score", col("score").cast("int"))
+if "descendants" in normalized.columns:
+    normalized = normalized.withColumn("descendants", col("descendants").cast("int"))
+if "deleted" in normalized.columns:
+    normalized = normalized.withColumn("deleted", col("deleted").cast("boolean"))
+if "dead" in normalized.columns:
+    normalized = normalized.withColumn("dead", col("dead").cast("boolean"))
+if "time" in normalized.columns:
+    normalized = normalized.withColumn("time", to_timestamp(col("time")))
+if "ingestion_time" in normalized.columns:
+    normalized = normalized.withColumn(
+        "ingestion_time", to_timestamp(col("ingestion_time"))
+    )
+
+# Corrupted record filtering
+filtered = normalized
+if "_corrupt_record" in filtered.columns:
+    filtered = filtered.filter(col("_corrupt_record").isNull())
+if "type" in filtered.columns:
+    filtered = filtered.filter(col("type").isNotNull())
+if "time" in filtered.columns:
+    filtered = filtered.filter(col("time").isNotNull())
+
+# Soft delete handling
+if "deleted" in filtered.columns and "dead" in filtered.columns:
+    filtered = filtered.withColumn(
+        "is_deleted", col("deleted") | col("dead")
+    )
+elif "deleted" in filtered.columns:
+    filtered = filtered.withColumn("is_deleted", col("deleted"))
+elif "dead" in filtered.columns:
+    filtered = filtered.withColumn("is_deleted", col("dead"))
+else:
+    filtered = filtered.withColumn("is_deleted", lit(False))
+
+# Deduplication (prefer latest by event_timestamp if possible)
+deduped = filtered
+if "id" in deduped.columns and "ingestion_time" in deduped.columns:
+    w = Window.partitionBy("id").orderBy(col("ingestion_time").desc())
+    deduped = (
+        deduped.withColumn("_rn", row_number().over(w))
+        .filter(col("_rn") == 1)
+        .drop("_rn")
+    )
+elif "id" in deduped.columns and "time" in deduped.columns:
+    w = Window.partitionBy("id").orderBy(col("time").desc())
+    deduped = (
+        deduped.withColumn("_rn", row_number().over(w))
+        .filter(col("_rn") == 1)
+        .drop("_rn")
+    )
+else:
+    deduped = deduped.dropDuplicates()
+
+# Record type separation + metadata columns
+record_typed = deduped.withColumn("record_type", col("type"))
+metadata_cols = [c for c in record_typed.columns if not c.startswith("_")]
+record_typed = (
+    record_typed.withColumn("_ingest_ts", current_timestamp())
+    .withColumn("_source_database", lit(args["source_database"]))
+    .withColumn("_source_table", lit(args["source_table"]))
+    .withColumn(
+        "_record_hash",
+        sha2(concat_ws("||", *[col(c).cast("string") for c in metadata_cols]), 256),
+    )
+)
+
+# Partitioning columns
+transformed = record_typed
+if "time" in transformed.columns:
+    transformed = (
+        transformed.withColumn("year", year(col("time")))
+        .withColumn("month", month(col("time")))
+        .withColumn("day", dayofmonth(col("time")))
+    )
+
+# Final filter to drop soft-deleted rows
+transformed = transformed.filter(~col("is_deleted"))
+
+# Write partitioned output
+transformed.write \
+    .mode("overwrite") \
+    .format("parquet") \
+    .partitionBy("record_type", "year", "month", "day") \
+    .option("path", args["output_path"]) \
+    .saveAsTable("events_silver")
+    
+job.commit()

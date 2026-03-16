@@ -18,83 +18,109 @@ variable "project" {
 
 variable "profile" {
   description = "AWS CLI Profile"
-  type = string
-  default = "default"
+  type        = string
+  default     = "default"
 }
 
 variable "role_arn" {
   description = "Role ARN for provider authentication"
-  type = string
+  type        = string
 }
 
 variable "session_name" {
   description = "Role session name"
-  type = string
+  type        = string
 }
 
 variable "vpc_cidr" {
   description = "VPC CIDR block"
-  default = "10.0.0.0/16"
+  default     = "10.0.0.0/16"
 }
 
-variable "public_subnet_cidr" {
+variable "public_subnet" {
   description = "VPC public subnet CIDR block"
-  default = "10.0.10.0/24"
+  type        = map(string)
+  default = {
+    cidr_block = "10.0.10.0/24"
+    az         = "us-east-1a"
+  }
 }
 
-variable "private_subnet_cidr" {
-  description = "VPC private subnet CIDR block"
-  default = "10.0.20.0/24"
+variable "private_subnet_a" {
+  description = "VPC private subnet A CIDR block"
+  type        = map(string)
+  default = {
+    cidr_block = "10.0.20.0/24"
+    az         = "us-east-1a"
+  }
+}
+
+variable "private_subnet_b" {
+  description = "VPC private subnet B CIDR block"
+  type        = map(string)
+  default = {
+    cidr_block = "10.0.21.0/24"
+    az         = "us-east-1b"
+  }
+}
+
+variable "private_subnet_c" {
+  description = "VPC private subnet C CIDR block"
+  type        = map(string)
+  default = {
+    cidr_block = "10.0.22.0/24"
+    az         = "us-east-1c"
+  }
 }
 
 variable "instance_type" {
   description = "Instance type for EC2"
-  default = "t3.micro"
+  default     = "t3.micro"
 }
 
 variable "ami_id" {
   description = "Id of Amazon Linux 2023"
-  default = "ami-0532be01f26a3de55"
+  default     = "ami-0532be01f26a3de55"
 }
 
 variable "s3_prefix" {
   description = "Prefix of S3 buckets ARN"
-  default = ""
+  default     = ""
 }
 
 variable "bucket_bronze_layer" {
   description = "Name of S3 bronze layer bucket"
-  default = "bronze-layer"
+  default     = "bronze-layer"
 }
 
 variable "bucket_silver_layer" {
   description = "Name of S3 silver layer bucket"
-  default = "silver-layer"
+  default     = "silver-layer"
 }
 
 variable "bucket_gold_layer" {
-  description = "Name of S3 gold data bucket"
-  default = "gold-data"
+  description = "Name of S3 gold layer bucket"
+  default     = "gold-layer"
 }
 
 variable "bucket_docker" {
   description = "Name of S3 docker bucket"
-  default = "docker"
+  default     = "docker"
 }
 
 variable "bucket_airflow" {
   description = "Name of S3 airflow bucket"
-  default = "airflow"
+  default     = "airflow"
 }
 
 variable "bucket_glue" {
   description = "Name of S3 glue bucket"
-  default = "glue"
+  default     = "glue"
 }
 
 variable "param_env" {
   description = "SSM parameter name of .env file"
-  default = ".env"
+  default     = ".env"
 }
 
 variable "redshift_database_name" {
@@ -121,9 +147,20 @@ variable "redshift_base_capacity" {
   default     = 4
 }
 
-variable "glue_db_name" {
-  description = "Glue Catalog Database name"
+variable "bronze_db_name" {
+  description = "Glue Catalog Database name for bronze layer"
   type        = string
-  default     = "hackernews_db"
+  default     = "hackernews_bronze"
 }
 
+variable "silver_db_name" {
+  description = "Glue Catalog Database name for silver layer"
+  type        = string
+  default     = "hackernews_silver"
+}
+
+variable "gold_db_name" {
+  description = "Glue Catalog Database name for gold layer"
+  type        = string
+  default     = "hackernews_gold"
+}

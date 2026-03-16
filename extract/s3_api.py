@@ -16,12 +16,12 @@ def get_s3_client():
     return _S3_CLIENT
 
 
-def load_object_s3(bucket: str, key: str, data: str) -> None:
+def load_object_s3(bucket: str, key: str, data: str, s3_client=None) -> None:
     if not bucket or not key:
         raise ValueError("Bucket and key must not be empty")
     
     try:
-        s3 = get_s3_client()
+        s3 = s3_client or get_s3_client()
         s3.put_object(
             Bucket=bucket,
             Key=key,

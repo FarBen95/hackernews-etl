@@ -1,0 +1,45 @@
+{
+  "streams": [
+    {
+      "tap_stream_id": "items",
+      "stream": "items",
+      "key_properties": ["id"],
+      "schema": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "description": "The item's unique id." },
+          "deleted": { "type": ["null", "boolean"], "description": "True if the item is deleted." },
+          "type": { "type": "string", "description": "The type of item (job, story, comment, poll, pollopt)." },
+          "by": { "type": "string", "description": "The username of the item's author." },
+          "time": { "type": "integer", "description": "Creation date of the item, in Unix Time." },
+          "text": { "type": ["null", "string"], "description": "The comment, story or poll text. HTML." },
+          "dead": { "type": ["null", "boolean"], "description": "True if the item is dead." },
+          "parent": { "type": ["null", "integer"], "description": "The item's parent." },
+          "kids": {
+            "type": ["null", "array"],
+            "items": { "type": "integer" },
+            "description": "The ids of the item's comments."
+          },
+          "url": { "type": ["null", "string"], "description": "The URL of the story." },
+          "score": { "type": ["null", "integer"], "description": "The story's score." },
+          "title": { "type": ["null", "string"], "description": "The title of the story, poll or job." },
+          "parts": {
+            "type": ["null", "array"],
+            "items": { "type": "integer" },
+            "description": "A list of related pollopts, in display order."
+          },
+          "descendants": { "type": ["null", "integer"], "description": "Total comment count." }
+        }
+      },
+      "metadata": [
+        {
+          "breadcrumb": [],
+          "metadata": {
+            "inclusion": "available",
+            "selected": true
+          }
+        }
+      ]
+    }
+  ]
+}

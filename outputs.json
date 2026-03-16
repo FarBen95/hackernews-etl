@@ -1,0 +1,117 @@
+{
+  "aws_region": {
+    "sensitive": false,
+    "type": "string",
+    "value": "us-east-1"
+  },
+  "current_profile": {
+    "sensitive": false,
+    "type": "string",
+    "value": "hackernews"
+  },
+  "environment": {
+    "sensitive": false,
+    "type": "string",
+    "value": "dev"
+  },
+  "project": {
+    "sensitive": false,
+    "type": "string",
+    "value": "hackernews-etl"
+  },
+  "redshift_names": {
+    "sensitive": false,
+    "type": [
+      "object",
+      {
+        "database": "string",
+        "namespace": "string",
+        "workgroup": "string"
+      }
+    ],
+    "value": {
+      "database": "hackernews_db",
+      "namespace": "hackernews-etl-redshift-namespace",
+      "workgroup": "hackernews-etl-redshift-workgroup"
+    }
+  },
+  "s3_bucket_arns": {
+    "sensitive": false,
+    "type": [
+      "object",
+      {
+        "airflow": "string",
+        "bronze": "string",
+        "docker": "string",
+        "glue": "string",
+        "gold": "string",
+        "silver": "string"
+      }
+    ],
+    "value": {
+      "airflow": "arn:aws:s3:::hackernews-etl-dev-airflow",
+      "bronze": "arn:aws:s3:::hackernews-etl-dev-bronze-layer",
+      "docker": "arn:aws:s3:::hackernews-etl-dev-docker",
+      "glue": "arn:aws:s3:::hackernews-etl-dev-glue",
+      "gold": "arn:aws:s3:::hackernews-etl-dev-gold-data",
+      "silver": "arn:aws:s3:::hackernews-etl-dev-silver-layer"
+    }
+  },
+  "s3_bucket_names": {
+    "sensitive": false,
+    "type": [
+      "object",
+      {
+        "airflow": "string",
+        "bronze": "string",
+        "docker": "string",
+        "glue": "string",
+        "gold": "string",
+        "silver": "string"
+      }
+    ],
+    "value": {
+      "airflow": "hackernews-etl-dev-airflow",
+      "bronze": "hackernews-etl-dev-bronze-layer",
+      "docker": "hackernews-etl-dev-docker",
+      "glue": "hackernews-etl-dev-glue",
+      "gold": "hackernews-etl-dev-gold-data",
+      "silver": "hackernews-etl-dev-silver-layer"
+    }
+  },
+  "security_group_names": {
+    "sensitive": false,
+    "type": [
+      "object",
+      {
+        "backend_sg": "string",
+        "redshift_serverless": "string"
+      }
+    ],
+    "value": {
+      "backend_sg": "hackernews-etl-backend-instance-sg",
+      "redshift_serverless": "hackernews-etl-redshift-serverless-sg"
+    }
+  },
+  "ssm_env_parameter_name": {
+    "sensitive": false,
+    "type": "string",
+    "value": ".env"
+  },
+  "vpc_names": {
+    "sensitive": false,
+    "type": [
+      "object",
+      {
+        "private_subnet": "string",
+        "public_subnet": "string",
+        "vpc": "string"
+      }
+    ],
+    "value": {
+      "private_subnet": "hackernews-etl-subnet-private",
+      "public_subnet": "hackernews-etl-subnet-public",
+      "vpc": "hackernews-etl-vpc"
+    }
+  }
+}
