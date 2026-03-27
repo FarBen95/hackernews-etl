@@ -150,9 +150,9 @@ Each task is tagged as `required` or `optional`.
 - Milestone 5 exit criteria met.
 
 **Tasks**
-- [ ] (`required`) Provision Redshift (serverless or small cluster).
-- [ ] (`required`) Create schema and target tables for raw or curated data.
-- [ ] (`required`) Implement load from S3 to Redshift (COPY or Spectrum).
+- [x] (`required`) Provision Redshift (serverless or small cluster).
+- [~] (`required`) Create schema and target tables for raw or curated data.
+- [x] (`required`) Implement load from S3 to Redshift (COPY or Spectrum).
 - [ ] (`required`) Add a sample analytic query and store results.
 - [ ] (`optional`) Add staging tables and simple upsert strategy.
 - [ ] (`optional`) Add a materialized view for trending stories.
@@ -170,12 +170,12 @@ Each task is tagged as `required` or `optional`.
 - Milestone 4 exit criteria met.
 
 **Tasks**
-- [ ] (`optional`) Define curated table models (e.g., `items`, `stories`, `comments`).
-- [ ] (`optional`) Implement transformations from raw to curated (Python or SQL).
-- [ ] (`optional`) Store curated data as parquet in S3 `curated/hn/`.
+- [x] (`optional`) Define curated table models (e.g., `items`, `stories`, `comments`).
+- [x] (`optional`) Implement transformations from raw to curated (Python or SQL).
+- [x] (`optional`) Store curated data as parquet in S3 `curated/hn/`.
 - [ ] (`optional`) Add a validation step (row counts, required fields).
 - [ ] (`optional`) Add deduplication and late-arriving data handling.
-- [ ] (`optional`) Update Glue tables to include curated datasets.
+- [x] (`optional`) Update Glue tables to include curated datasets.
 
 **Exit criteria**
 - Curated parquet appears in S3 with validation results.
@@ -250,8 +250,8 @@ Each task is tagged as `required` or `optional`.
 - Milestone 10 exit criteria met.
 
 **Tasks**
-- [ ] (`required`) create trusted entity for cli user assume role.
-- [ ] (`required`) reduce terraform permissions to least privilege for aws management.
+- [x] (`required`) create trusted entity for cli user assume role.
+- [x] (`required`) reduce terraform permissions to least privilege for aws management.
 
 
 **Exit criteria**

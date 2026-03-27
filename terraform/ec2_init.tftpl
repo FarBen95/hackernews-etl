@@ -1,0 +1,114 @@
+#!/bin/bash
+set -euo pipefail
+
+# ----- Logging -----
+LOG_DIR="/var/log/init-script"
+LOG_FILE="$LOG_DIR/init-$(date +%Y%m%dT%H%M%S).log"
+mkdir -p "$LOG_DIR"
+chmod 755 "$LOG_DIR"
+
+# Timestamp every line and append to the log file
+exec > >(awk '{print strftime("[%Y-%m-%d %H:%M:%S]"), $0; fflush()}' | tee -a "$LOG_FILE") 2>&1
+
+# ----- Functions -----
+log() {
+  echo "[INFO] $*"
+}
+
+die() {
+  echo "[ERROR] $*"
+  exit 1
+}
+
+# ----- Main Script -----
+trap 'die "Script failed at line $LINENO. Last command: $BASH_COMMAND"' ERR
+
+S3_CONFIG_PATH="${s3_config_path}"
+S3_DAGS_PATH="${s3_dags_path}"
+SSM_ENV_PARAM="${ssm_env_param}"
+SOURCEDIR=/opt/source
+WORKDIR=/opt/airflow
+USER_NAME=$(whoami)
+USER_UID=$(id -u)
+
+log "Starting EC2 init script"
+log "Source directory: $SOURCEDIR"
+log "Work directory: $WORKDIR"
+
+dnf update -y
+
+log "Installing docker"
+dnf remove -y docker docker-client docker-client-latest docker-common docker-latest docker-latest-logrotate docker-logrotate docker-engine
+dnf -y install dnf-plugins-core
+dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+sed -i 's/$releasever/9/g' /etc/yum.repos.d/docker-ce.repo
+dnf -y install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+log "Installing AWS CLI"
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+./aws/install
+
+log "Enabling and starting Docker"
+systemctl enable --now docker
+
+log "Current user: $(whoami), UID: $(id -u), GID: $(id -g)"
+
+log "Adding current user to docker group"
+usermod -aG docker $USER_NAME
+
+log "Preparing source directory: $SOURCEDIR"
+mkdir -p "$SOURCEDIR"
+chmod 755 "$SOURCEDIR"
+cd "$SOURCEDIR"
+
+log "Fetching config from S3: $S3_CONFIG_PATH"
+aws s3 cp "$S3_CONFIG_PATH" . --recursive
+
+log "Fetching .env from SSM Parameter Store: $SSM_ENV_PARAM"
+aws ssm get-parameter --name "$SSM_ENV_PARAM" --with-decryption --query "Parameter.Value" --output text > .env
+
+log "Preparing airflow directory: $WORKDIR"
+mkdir -p "$WORKDIR"
+chmod 755 "$WORKDIR"
+
+log "Starting services with docker compose"
+echo -e "AIRFLOW_UID=$USER_UID" >> $SOURCEDIR/.env
+docker compose up -d
+
+log "Creating DAG sync script"
+DAGS_DIR="$WORKDIR/dags"
+cat > /usr/local/bin/sync-dags.sh <<EOF
+#!/bin/bash
+set -euo pipefail
+aws s3 sync "$S3_DAGS_PATH" "$DAGS_DIR" --delete
+EOF
+chmod +x /usr/local/bin/sync-dags.sh
+
+log "Creating systemd service and timer for DAG sync"
+cat > /etc/systemd/system/sync-dags.service <<EOF
+[Unit]
+Description=Sync DAGs from S3
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/sync-dags.sh
+EOF
+
+cat > /etc/systemd/system/sync-dags.timer <<EOF
+[Unit]
+Description=Run sync-dags every 5 minutes
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=1m
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+EOF
+
+systemctl daemon-reload
+systemctl enable --now sync-dags.timer
+
+log "EC2 init script complete"

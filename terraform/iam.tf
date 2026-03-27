@@ -1,5 +1,99 @@
 data "aws_caller_identity" "current" {}
 
+# EC2 backend instance role
+resource "aws_iam_role" "backend_instance_role" {
+  name               = "${var.project}-backend-instance-role"
+  assume_role_policy = data.aws_iam_policy_document.backend_instance_trust_policy.json
+}
+
+resource "aws_iam_instance_profile" "backend_instance_profile" {
+  name = "${var.project}-backend-instance-profile"
+  role = aws_iam_role.backend_instance_role.name
+}
+
+data "aws_iam_policy_document" "backend_instance_trust_policy" {
+  statement {
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
+    principals {
+      type        = "Service"
+      identifiers = ["ec2.amazonaws.com"]
+    }
+    condition {
+      test     = "StringEquals"
+      variable = "aws:SourceAccount"
+      values   = [data.aws_caller_identity.current.account_id]
+    }
+  }
+}
+
+data "aws_iam_policy_document" "backend_instance_policy" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "ssm:UpdateInstanceInformation",
+      "ssmmessages:CreateControlChannel",
+      "ssmmessages:CreateDataChannel",
+      "ssmmessages:OpenControlChannel",
+      "ssmmessages:OpenDataChannel"
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+      "logs:DescribeLogGroups",
+      "logs:DescribeLogStreams"
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "s3:Get*",
+      "s3:List*",
+      "s3:Describe*",
+      "s3-object-lambda:Get*",
+      "s3-object-lambda:List*"
+    ]
+    resources = ["arn:aws:s3:::${var.project}-*"]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "s3:PutObject*"
+    ]
+    resources = [
+      "arn:aws:s3:::${aws_s3_bucket.airflow.bucket}/*",
+      "arn:aws:s3:::${aws_s3_bucket.bronze_layer.bucket}/*"
+    ]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "ssm:Put*",
+      "ssm:Delete*",
+      "ssm:Get*",
+      "ssm:Describe*"
+    ]
+    resources = [
+      "arn:aws:ssm:${var.region}:${data.aws_caller_identity.current.account_id}:parameter/${var.project}/*"
+    ]
+  }
+}
+
+resource "aws_iam_role_policy" "backend_instance_inline_policy" {
+  name   = "${var.project}-backend-instance-policy"
+  role   = aws_iam_role.backend_instance_role.id
+  policy = data.aws_iam_policy_document.backend_instance_policy.json
+}
+
 # IAM Role for Glue Crawler
 resource "aws_iam_role" "glue_crawler_role" {
   name               = "${var.project}-glue-crawler-role"
@@ -108,8 +202,8 @@ locals {
 }
 
 resource "aws_iam_role_policy_attachment" "glue_job_managed_policy_attachment" {
-  for_each = toset(local.managed_policy_arns)
-  role = aws_iam_role.glue_job_role.name
+  for_each   = toset(local.managed_policy_arns)
+  role       = aws_iam_role.glue_job_role.name
   policy_arn = each.value
 }
 

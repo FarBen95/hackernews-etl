@@ -75,12 +75,12 @@ variable "private_subnet_c" {
 
 variable "instance_type" {
   description = "Instance type for EC2"
-  default     = "t3.micro"
+  default     = "t3.medium"
 }
 
 variable "ami_id" {
   description = "Id of Amazon Linux 2023"
-  default     = "ami-0532be01f26a3de55"
+  default     = "ami-02dfbd4ff395f2a1b"
 }
 
 variable "s3_prefix" {
@@ -103,9 +103,9 @@ variable "bucket_gold_layer" {
   default     = "gold-layer"
 }
 
-variable "bucket_docker" {
-  description = "Name of S3 docker bucket"
-  default     = "docker"
+variable "bucket_config" {
+  description = "Name of S3 config bucket"
+  default     = "config"
 }
 
 variable "bucket_airflow" {

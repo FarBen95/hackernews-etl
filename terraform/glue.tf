@@ -95,16 +95,16 @@ resource "aws_glue_job" "gold_transform_spark_job" {
     "--job-language"                     = "python"
     "--TempDir"                          = "s3://${aws_s3_bucket.glue.bucket}/temp/"
     "--source_database"                  = aws_glue_catalog_database.silver_catalog_db.name
-    "--source_tables" = {
+    "--source_tables" = jsonencode({
       stories  = "stories",
       comments = "comments",
       jobs     = "jobs",
       polls    = "polls",
       pollopt  = "pollopt",
       asks     = "asks"
-    }
-    "--output_database"                  = aws_glue_catalog_database.gold_catalog_db.name
-    "--output_path" = "s3://${aws_s3_bucket.gold_layer.bucket}/"
+    })
+    "--output_database" = aws_glue_catalog_database.gold_catalog_db.name
+    "--output_path"     = "s3://${aws_s3_bucket.gold_layer.bucket}/"
   }
 
   execution_property {

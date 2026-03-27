@@ -24,7 +24,7 @@ output "s3_bucket_names" {
     bronze  = aws_s3_bucket.bronze_layer.bucket
     silver  = aws_s3_bucket.silver_layer.bucket
     gold    = aws_s3_bucket.gold_layer.bucket
-    docker  = aws_s3_bucket.docker.bucket
+    config  = aws_s3_bucket.config.bucket
     airflow = aws_s3_bucket.airflow.bucket
     glue    = aws_s3_bucket.glue.bucket
   }
@@ -36,22 +36,22 @@ output "s3_bucket_arns" {
     bronze  = aws_s3_bucket.bronze_layer.arn
     silver  = aws_s3_bucket.silver_layer.arn
     gold    = aws_s3_bucket.gold_layer.arn
-    docker  = aws_s3_bucket.docker.arn
+    config  = aws_s3_bucket.config.arn
     airflow = aws_s3_bucket.airflow.arn
     glue    = aws_s3_bucket.glue.arn
   }
 }
 
-# output "ssm_env_parameter_name" {
-#   description = "SSM Parameter Store key containing runtime .env values"
-#   value       = aws_ssm_parameter.env_param.name
-# }
+output "ssm_env_parameter_name" {
+  description = "SSM Parameter Store key containing runtime .env values"
+  value       = aws_ssm_parameter.env_param.name
+}
 
 output "vpc_names" {
   description = "Derived VPC and subnet names (IDs not available in root module until resources are wired in)"
   value = {
-    vpc            = aws_vpc.vpc.tags.Name
-    public_subnet  = aws_subnet.public_subnet.tags.Name
+    vpc              = aws_vpc.vpc.tags.Name
+    public_subnet    = aws_subnet.public_subnet.tags.Name
     private_subnet_a = aws_subnet.private_subnet_a.tags.Name
     private_subnet_b = aws_subnet.private_subnet_b.tags.Name
     private_subnet_c = aws_subnet.private_subnet_c.tags.Name
@@ -102,8 +102,28 @@ output "glue_job_names" {
 output "iam_role_names" {
   description = "IAM role names used by the pipeline"
   value = {
-    glue_crawler = aws_iam_role.glue_crawler_role.name
-    glue_job = aws_iam_role.glue_job_role.name
+    backend_instance    = aws_iam_role.backend_instance_role.name
+    glue_crawler        = aws_iam_role.glue_crawler_role.name
+    glue_job            = aws_iam_role.glue_job_role.name
     redshift_serverless = aws_iam_role.redshift_serverless_role.name
+  }
+}
+
+output "iam_instance_profile_names" {
+  description = "IAM instance profile names used by EC2 instances"
+  value = {
+    backend_instance = aws_iam_instance_profile.backend_instance_profile.name
+  }
+}
+
+output "ec2_backend_instance" {
+  description = "Backend EC2 instance identifiers"
+  value = {
+    id                   = aws_instance.backend_instance.id
+    arn                  = aws_instance.backend_instance.arn
+    private_ip           = aws_instance.backend_instance.private_ip
+    subnet_id            = aws_instance.backend_instance.subnet_id
+    security_group_ids   = aws_instance.backend_instance.vpc_security_group_ids
+    iam_instance_profile = aws_instance.backend_instance.iam_instance_profile
   }
 }

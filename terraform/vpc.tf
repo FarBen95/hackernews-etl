@@ -22,7 +22,7 @@ resource "aws_subnet" "private_subnet_a" {
   vpc_id            = aws_vpc.vpc.id
   cidr_block        = var.private_subnet_a["cidr_block"]
   availability_zone = var.private_subnet_a["az"]
-  
+
   tags = {
     Name = "${var.project}-subnet-a-private"
   }
@@ -90,7 +90,7 @@ resource "aws_route_table_association" "public_rtba" {
   route_table_id = aws_route_table.public_rtb.id
 }
 
-resource "aws_route_table" "private_rtb" {
+resource "aws_route_table" "private_a_rtb" {
   vpc_id = aws_vpc.vpc.id
 
   route {
@@ -103,26 +103,42 @@ resource "aws_route_table" "private_rtb" {
   }
 }
 
+resource "aws_route_table" "private_b_rtb" {
+  vpc_id = aws_vpc.vpc.id
+
+  tags = {
+    Name = "${var.project}-rtb-private"
+  }
+}
+
+resource "aws_route_table" "private_c_rtb" {
+  vpc_id = aws_vpc.vpc.id
+
+  tags = {
+    Name = "${var.project}-rtb-private"
+  }
+}
+
 resource "aws_route_table_association" "private_a_rtba" {
   subnet_id      = aws_subnet.private_subnet_a.id
-  route_table_id = aws_route_table.private_rtb.id
+  route_table_id = aws_route_table.private_a_rtb.id
 }
 
 resource "aws_route_table_association" "private_b_rtba" {
   subnet_id      = aws_subnet.private_subnet_b.id
-  route_table_id = aws_route_table.private_rtb.id
+  route_table_id = aws_route_table.private_b_rtb.id
 }
 
 resource "aws_route_table_association" "private_c_rtba" {
   subnet_id      = aws_subnet.private_subnet_c.id
-  route_table_id = aws_route_table.private_rtb.id
+  route_table_id = aws_route_table.private_c_rtb.id
 }
 
 resource "aws_vpc_endpoint" "s3_vpce" {
   vpc_id            = aws_vpc.vpc.id
   service_name      = "com.amazonaws.${var.region}.s3"
   vpc_endpoint_type = "Gateway"
-  route_table_ids   = [aws_route_table.private_rtb.id]
+  route_table_ids   = [aws_route_table.private_a_rtb.id]
 
   tags = {
     Name = "${var.project}-vpce-s3"

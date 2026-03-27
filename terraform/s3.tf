@@ -52,18 +52,18 @@ resource "aws_s3_bucket_versioning" "gold_layer" {
   }
 }
 
-resource "aws_s3_bucket" "docker" {
-  bucket = "${var.project}-${var.environment}-${var.bucket_docker}"
+resource "aws_s3_bucket" "config" {
+  bucket = "${var.project}-${var.environment}-${var.bucket_config}"
 
   tags = {
-    Name        = "${var.project}-${var.environment}-${var.bucket_docker}"
+    Name        = "${var.project}-${var.environment}-${var.bucket_config}"
     Environment = var.environment
     Project     = var.project
   }
 }
 
-resource "aws_s3_bucket_versioning" "docker" {
-  bucket = aws_s3_bucket.docker.id
+resource "aws_s3_bucket_versioning" "config" {
+  bucket = aws_s3_bucket.config.id
 
   versioning_configuration {
     status = "Enabled"
@@ -103,6 +103,37 @@ resource "aws_s3_bucket_versioning" "glue" {
 
   versioning_configuration {
     status = "Enabled"
+  }
+}
+
+locals {
+  backend_files = fileset("${path.module}/../config/backend", "**/*")
+  dags_files    = fileset("${path.module}/../dags", "**/*")
+}
+
+resource "aws_s3_object" "backend_config" {
+  for_each = local.backend_files
+  bucket   = aws_s3_bucket.config.bucket
+  key      = each.value
+  source   = "${path.module}/../config/backend/${each.value}"
+  etag     = filemd5("${path.module}/../config/backend/${each.value}")
+
+  tags = {
+    Project     = var.project
+    Environment = var.environment
+  }
+}
+
+resource "aws_s3_object" "airflow_dags" {
+  for_each = local.dags_files
+  bucket   = aws_s3_bucket.airflow.bucket
+  key      = "dags/${each.value}"
+  source   = "${path.module}/../dags/${each.value}"
+  etag     = filemd5("${path.module}/../dags/${each.value}")
+
+  tags = {
+    Project     = var.project
+    Environment = var.environment
   }
 }
 
